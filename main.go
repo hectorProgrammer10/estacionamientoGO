@@ -1,14 +1,12 @@
 package main
 
 import (
+	"estacionamiento/src/scenes"
 	"os"
-
-	"image/color"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
-	"fyne.io/fyne/v2/container"
 )
 
 func main() {
@@ -19,9 +17,10 @@ func main() {
 	myWindow.Resize(fyne.NewSize(900, 400))
 	myWindow.SetFixedSize(true)
 
-	//fondo blanco
-	rect := canvas.NewRectangle(color.White)
-	rect.Resize(fyne.NewSize(900, 400))
+	//--esena
+	scene := scenes.NewScene(myWindow)
+	scene.Init()
+
 	//estacionamiento
 	imagePath := "src/views/estacionamiento.png"
 	imgFile, err := os.Open(imagePath)
@@ -35,15 +34,8 @@ func main() {
 
 	img.Move(fyne.NewPos(300, 150))
 
-	background := container.NewWithoutLayout(img)
 	//------------
 
-	// Si necesitas añadir widgets sobre el fondo, usa un contenedor adicional
-	content := container.NewMax(
-		rect, background, // Fondo
-		// Aquí puedes agregar otros widgets o contenedores como `canvas.Text` o `widget.Button`
-	)
-
-	myWindow.SetContent(content)
+	scene.AddImage(img)
 	myWindow.ShowAndRun()
 }
