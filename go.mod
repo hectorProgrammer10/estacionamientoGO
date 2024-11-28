@@ -1,4 +1,4 @@
-module estacionamiento
+module estacionamientoGo
 
 go 1.20
 
