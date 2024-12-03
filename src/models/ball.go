@@ -1,6 +1,7 @@
 package models
 
 import (
+	"estacionamientoGo/src/vigilante"
 	"fmt"
 	"math/rand"
 	"sync"
@@ -9,6 +10,8 @@ import (
 
 // Definimos un mutex global para sincronizar el acceso al estacionamiento
 var mu sync.Mutex
+
+var pasar sync.Mutex
 
 // Variable global para las posiciones del estacionamiento
 var posiciones = []estacionamiento{
@@ -43,6 +46,7 @@ func NewBall() *Ball {
 
 // Lógica principal de la Ball
 func (b *Ball) Run() {
+
 	var sigue bool = true
 	var incX int32 = 10
 	var rotationSpeed int32 = 5
@@ -53,7 +57,7 @@ func (b *Ball) Run() {
 		if posicion == -1 { // Si no hay lugares disponibles
 			fmt.Println("No hay lugares disponibles, creando uno nuevo...")
 			b.moverAZonaDeEspera()
-			time.Sleep(1 * time.Second) // Esperar un tiempo antes de volver a intentar
+			time.Sleep(2 * time.Second) // Esperar un tiempo antes de volver a intentar
 			continue
 
 		}
@@ -88,19 +92,21 @@ func (b *Ball) Run() {
 		}
 
 		fmt.Printf("Ball estacionada en lugar: %+v\n", posiciones[posicion])
-		time.Sleep(time.Duration(rand.Intn(100)) * time.Second)
+
+		fmt.Println("completadp")
+
 		sigue = false
 
-		// Simular tiempo de ocupación
-		//time.Sleep(time.Duration(rand.Intn(6)+6) * time.Second)
-
-		// Liberar el lugar
+		time.Sleep(time.Duration(rand.Intn(20)) * time.Second)
 		mu.Lock()
+
 		posiciones[posicion].ocupado = false
 		mu.Unlock()
 
 		fmt.Printf("Ball liberó lugar: %+v\n", posiciones[posicion])
+
 	}
+
 }
 
 // Mover la Ball a la zona de espera
@@ -166,8 +172,36 @@ func (b *Ball) NotifyAll() {
 
 // func Destruir(b *Ball, done chan<- bool) {
 func Destruir(b *Ball) {
-	//b.status = false
-	b.observers = nil
+	var desX int32 = 10
+	originX := int32(100)
+	b.posY = 200
+	b.status = true
+	for b.status {
+		if b.posX != originX {
+			b.posX -= desX
+			b.status = true
+		}
+		if b.posX == originX {
+			b.status = false
+		}
+		b.NotifyAll()
+		time.Sleep(50 * time.Millisecond)
+
+	}
+	fmt.Println("DEstruir--")
+
+}
+func Estacionamiento(estadoChannel <-chan string, resultadoChannel chan<- bool, v *vigilante.Vigilante) {
+	for estado := range estadoChannel {
+
+		// Actualiza el estado del vigilante y envía el resultado
+		resultado := v.ActualizarEstado(estado)
+
+		resultadoChannel <- resultado
+
+		fmt.Printf("Estacionamiento procesó: %s | Entrada libre: %v\n", estado, resultado)
+
+	}
 }
 
 /*func (b *Ball) SetStatus(status bool) {
