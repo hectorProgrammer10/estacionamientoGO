@@ -44,7 +44,7 @@ func main() {
 			}()
 
 			fmt.Println("auto creado numero: ", i)
-			time.Sleep(1000 * time.Millisecond)
+			time.Sleep(600 * time.Millisecond)
 		}
 	})
 
