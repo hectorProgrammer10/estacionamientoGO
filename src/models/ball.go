@@ -10,10 +10,8 @@ import (
 // Definimos un mutex global para sincronizar el acceso al estacionamiento
 var mu sync.Mutex
 
-var pasar sync.Mutex
 var salida = true
 var salidaR = true
-var destruirse = false
 
 // Variable global para las posiciones del estacionamiento
 var posiciones = []estacionamiento{
@@ -32,8 +30,8 @@ type estacionamiento struct {
 	ocupado bool
 }
 
-// Ball representa un objeto con posición y estado
-type Ball struct {
+// Car representa un objeto con posición y estado
+type Car struct {
 	posX, posY int32
 	status     bool
 	angulo     int32
@@ -42,13 +40,13 @@ type Ball struct {
 	observers  []Observer
 }
 
-// Crear una nueva instancia de Ball
-func NewBall() *Ball {
-	return &Ball{posX: -100, posY: 200, status: true}
+// Crear una nueva instancia de Car
+func NewCar() *Car {
+	return &Car{posX: -100, posY: 200, status: true}
 }
 
-// Lógica principal de la Ball
-func (b *Ball) Run() {
+// Lógica principal de la Car
+func (b *Car) Run() {
 
 	var sigue bool = true
 	var incX int32 = 50
@@ -77,7 +75,7 @@ func (b *Ball) Run() {
 				originY := int32(lugarSeleccionado.Y)
 				mu.Unlock()
 				wait := true
-				// Mover la Ball hacia el lugar asignado
+				// Mover la Car hacia el lugar asignado
 				b.status = true
 				b.angulo = 0
 				wait = true
@@ -96,7 +94,7 @@ func (b *Ball) Run() {
 							wait = false
 						}
 
-						// Rotación de la Ball
+						// Rotación de la Car
 						b.angulo = (b.angulo + rotationSpeed) % 90
 						b.NotifyAll()
 						time.Sleep(50 * time.Millisecond)
@@ -104,7 +102,7 @@ func (b *Ball) Run() {
 
 				}
 
-				//fmt.Printf("Ball estacionada en lugar: %+v\n", posiciones[posicion])
+				//fmt.Printf("Car estacionada en lugar: %+v\n", posiciones[posicion])
 
 				//fmt.Println("completadp")
 
@@ -121,7 +119,7 @@ func (b *Ball) Run() {
 				mu.Unlock()
 				b.posicion = posicion
 
-				//fmt.Printf("Ball liberó lugar: %+v\n", posiciones[posicion])
+				//fmt.Printf("Car liberó lugar: %+v\n", posiciones[posicion])
 			}
 
 		} else {
@@ -133,8 +131,8 @@ func (b *Ball) Run() {
 
 }
 
-// Mover la Ball a la zona de espera
-func (b *Ball) moverAZonaDeEspera() {
+// Mover la Car a la zona de espera
+func (b *Car) moverAZonaDeEspera() {
 	mover := true
 	b.esperando = true
 
@@ -162,7 +160,7 @@ func (b *Ball) moverAZonaDeEspera() {
 		time.Sleep(50 * time.Millisecond)
 	}
 
-	//fmt.Println("Ball en la zona de espera...")
+	//fmt.Println("Car en la zona de espera...")
 }
 
 // Buscar un lugar disponible de manera segura
@@ -179,29 +177,13 @@ func buscarLugarSeguro() int {
 	return -1 // No hay lugares disponibles
 }
 
-// Agregar un nuevo lugar de manera segura
-/*func agregarLugarSeguro() {
-	mu.Lock()
-	defer mu.Unlock()
-
-	ultimo := posiciones[len(posiciones)-1]
-	nuevoLugar := estacionamiento{
-		X:       ultimo.X + 100, // Desplazamos en el eje X
-		Y:       ultimo.Y,
-		ocupado: false,
-	}
-
-	posiciones = append(posiciones, nuevoLugar)
-	//fmt.Println("Se agregó un nuevo lugar:", nuevoLugar)
-}*/
-
 // Register añade un observador a la lista
-func (b *Ball) Register(observer Observer) {
+func (b *Car) Register(observer Observer) {
 	b.observers = append(b.observers, observer)
 }
 
 // Unregister elimina un observador de la lista
-func (b *Ball) Unregister(observer Observer) {
+func (b *Car) Unregister(observer Observer) {
 	for i, o := range b.observers {
 		if o == observer {
 			b.observers = append(b.observers[:i], b.observers[i+1:]...)
@@ -211,14 +193,14 @@ func (b *Ball) Unregister(observer Observer) {
 }
 
 // NotifyAll notifica a todos los observadores sobre una actualización
-func (b *Ball) NotifyAll() {
+func (b *Car) NotifyAll() {
 	for _, observer := range b.observers {
 		observer.Update(Pos{X: b.posX, Y: b.posY})
 	}
 }
 
-// func Destruir(b *Ball, done chan<- bool) {
-func Destruir(b *Ball) {
+// func Destruir(b *Car, done chan<- bool) {
+func Destruir(b *Car) {
 
 	var desX int32 = 50
 	originX := int32(-50)
@@ -272,7 +254,7 @@ func Estacionamiento(estadoChannel <-chan string, resultadoChannel chan<- bool, 
 	}
 }
 
-/*func (b *Ball) SetStatus(status bool) {
+/*func (b *Car) SetStatus(status bool) {
 	b.status = status
 }
 */

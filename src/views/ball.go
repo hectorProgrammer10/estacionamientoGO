@@ -9,31 +9,31 @@ import (
 	"fyne.io/fyne/v2/storage"
 )
 
-type Ball struct {
-	Ball *canvas.Image
+type Car struct {
+	Car *canvas.Image
 }
 
-func NewBall() *Ball {
-	return &Ball{Ball: nil}
+func NewCar() *Car {
+	return &Car{Car: nil}
 }
 
-func (b *Ball) AddBall(c scenes.Scene) {
+func (b *Car) AddCar(c scenes.Scene) {
 	pelota := canvas.NewImageFromURI(storage.NewFileURI("./assets/autoConcurrente.png"))
 	pelota.Resize(fyne.NewSize(48, 96))
 	pelota.Move(fyne.NewPos(-100, 200))
-	b.Ball = pelota
+	b.Car = pelota
 	c.AddImage(pelota)
 }
 
 // Update define lo que el observador hará cuando reciba una notificación
-func (b *Ball) Update(pos models.Pos) {
+func (b *Car) Update(pos models.Pos) {
 	//fmt.Printf("%d : %d\n", pos.X, pos.Y)
-	b.Ball.Move(fyne.NewPos(float32(pos.X), float32(pos.Y)))
+	b.Car.Move(fyne.NewPos(float32(pos.X), float32(pos.Y)))
 }
 
-func (b *Ball) RemoveBall() {
-	if b.Ball != nil {
-		b.Ball.Hide() // Ocultar la imagen antes de destruirla
-		b.Ball = nil  // Eliminar la referencia
+func (b *Car) RemoveCar() {
+	if b.Car != nil {
+		b.Car.Hide() // Ocultar la imagen antes de destruirla
+		b.Car = nil  // Eliminar la referencia
 	}
 }
