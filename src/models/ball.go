@@ -1,7 +1,6 @@
 package models
 
 import (
-	"estacionamientoGo/src/vigilante"
 	"math/rand"
 	"sync"
 	"time"
@@ -50,8 +49,7 @@ func (b *Car) Run() {
 
 	var sigue bool = true
 	var incX int32 = 10
-	var rotationSpeed int32 = 5
-	var contador int = 0
+	//var contador int = 0
 	for sigue {
 		if salida {
 			if salidaR {
@@ -93,9 +91,6 @@ func (b *Car) Run() {
 							b.status = false
 							wait = false
 						}
-
-						// Rotación de la Car
-						b.angulo = (b.angulo + rotationSpeed) % 90
 						b.NotifyAll()
 						time.Sleep(10 * time.Millisecond)
 					}
@@ -123,7 +118,7 @@ func (b *Car) Run() {
 			}
 
 		} else {
-			contador++
+			//contador++
 			time.Sleep(1 * time.Second)
 			//fmt.Println("esperando a que salida se desocupe salida", salida, salidaR)
 		}
@@ -225,7 +220,7 @@ func Destruir(b *Car) {
 							posiciones[b.posicion].ocupado = false
 						}
 						b.NotifyAll()
-						time.Sleep(50 * time.Millisecond)
+						time.Sleep(10 * time.Millisecond)
 					}
 				} else {
 					time.Sleep(1 * time.Second)
@@ -240,18 +235,6 @@ func Destruir(b *Car) {
 
 	//fmt.Println("DEstruir--")
 
-}
-func Estacionamiento(estadoChannel <-chan string, resultadoChannel chan<- bool, v *vigilante.Vigilante) {
-	for estado := range estadoChannel {
-
-		// Actualiza el estado del vigilante y envía el resultado
-		resultado := v.ActualizarEstado(estado)
-
-		resultadoChannel <- resultado
-
-		//fmt.Printf("Estacionamiento procesó: %s | Entrada libre: %v\n", estado, resultado)
-
-	}
 }
 
 /*func (b *Car) SetStatus(status bool) {
