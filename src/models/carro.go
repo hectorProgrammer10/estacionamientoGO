@@ -92,7 +92,7 @@ func (b *Car) Run() {
 							wait = false
 						}
 						b.NotifyAll()
-						time.Sleep(10 * time.Millisecond)
+						time.Sleep(5 * time.Millisecond)
 					}
 
 				}
@@ -104,7 +104,13 @@ func (b *Car) Run() {
 				sigue = false
 				salida = true
 				salidaR = true
-				time.Sleep(time.Duration(rand.Intn(20)) * time.Second)
+				rand.Seed(time.Now().UnixNano())
+
+				// Generar un número aleatorio entre 3 y 5 segundos
+				sleepTime := 3 + rand.Intn(3) // (3 valores posibles: 3, 4, 5)
+
+				// Dormir por el rango generado
+				time.Sleep(time.Duration(sleepTime) * time.Second)
 				mu.Lock()
 				salida = false
 				if !salida {
@@ -119,7 +125,7 @@ func (b *Car) Run() {
 
 		} else {
 			//contador++
-			time.Sleep(1 * time.Second)
+			time.Sleep(300 * time.Millisecond)
 			//fmt.Println("esperando a que salida se desocupe salida", salida, salidaR)
 		}
 	}
@@ -220,7 +226,7 @@ func Destruir(b *Car) {
 							posiciones[b.posicion].ocupado = false
 						}
 						b.NotifyAll()
-						time.Sleep(10 * time.Millisecond)
+						time.Sleep(5 * time.Millisecond)
 					}
 				} else {
 					time.Sleep(1 * time.Second)
