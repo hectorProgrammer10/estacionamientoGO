@@ -16,8 +16,8 @@ import (
 
 // Variables globales sincronizadas
 var mu sync.Mutex
-var ballSaliendo bool = false
-var ballEntrando bool = false
+var carSaliendo bool = false
+var carEntrando bool = false
 var cond = sync.NewCond(&mu)
 
 func main() {
@@ -48,10 +48,10 @@ func main() {
 			go func() {
 				mu.Lock()
 				// Esperar a que no haya balls saliendo
-				for ballSaliendo {
+				for carSaliendo {
 					cond.Wait()
 				}
-				ballEntrando = true
+				carEntrando = true
 				mu.Unlock()
 
 				// Entrar al estacionamiento
@@ -60,14 +60,14 @@ func main() {
 				estadoChannel <- "completado"
 
 				mu.Lock()
-				ballEntrando = false
+				carEntrando = false
 				cond.Broadcast() // Notificar a otras goroutines
 				mu.Unlock()
 
 				// Simular salida
 				//fmt.Println("Ball saliendo...")
 				mu.Lock()
-				ballSaliendo = true
+				carSaliendo = true
 				mu.Unlock()
 
 				estadoChannel <- "saliendo"
@@ -75,7 +75,7 @@ func main() {
 				estadoChannel <- "completado"
 
 				mu.Lock()
-				ballSaliendo = false
+				carSaliendo = false
 				cond.Broadcast() // Notificar a otras goroutines
 				mu.Unlock()
 
@@ -95,7 +95,7 @@ func main() {
 				}
 			}()
 			fmt.Println("auto creado numero: ", i)
-			time.Sleep(500 * time.Microsecond)
+			time.Sleep(1000 * time.Microsecond)
 		}
 	})
 

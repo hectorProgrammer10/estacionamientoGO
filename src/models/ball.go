@@ -49,7 +49,7 @@ func NewCar() *Car {
 func (b *Car) Run() {
 
 	var sigue bool = true
-	var incX int32 = 50
+	var incX int32 = 10
 	var rotationSpeed int32 = 5
 	var contador int = 0
 	for sigue {
@@ -97,7 +97,7 @@ func (b *Car) Run() {
 						// Rotación de la Car
 						b.angulo = (b.angulo + rotationSpeed) % 90
 						b.NotifyAll()
-						time.Sleep(50 * time.Millisecond)
+						time.Sleep(10 * time.Millisecond)
 					}
 
 				}
@@ -157,7 +157,7 @@ func (b *Car) moverAZonaDeEspera() {
 			}
 		}
 		b.NotifyAll()
-		time.Sleep(50 * time.Millisecond)
+		time.Sleep(30 * time.Millisecond)
 	}
 
 	//fmt.Println("Car en la zona de espera...")
@@ -202,7 +202,7 @@ func (b *Car) NotifyAll() {
 // func Destruir(b *Car, done chan<- bool) {
 func Destruir(b *Car) {
 
-	var desX int32 = 50
+	var desX int32 = 10
 	originX := int32(-50)
 	b.posY = 200
 	b.status = true
