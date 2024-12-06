@@ -2,7 +2,6 @@ package models
 
 import (
 	"estacionamientoGo/src/vigilante"
-	"fmt"
 	"math/rand"
 	"sync"
 	"time"
@@ -12,6 +11,9 @@ import (
 var mu sync.Mutex
 
 var pasar sync.Mutex
+var salida = true
+var salidaR = true
+var destruirse = false
 
 // Variable global para las posiciones del estacionamiento
 var posiciones = []estacionamiento{
@@ -36,86 +38,131 @@ type Ball struct {
 	status     bool
 	angulo     int32
 	esperando  bool
+	posicion   int
 	observers  []Observer
 }
 
 // Crear una nueva instancia de Ball
 func NewBall() *Ball {
-	return &Ball{posX: 0, posY: 0, status: true}
+	return &Ball{posX: -100, posY: 200, status: true}
 }
 
 // Lógica principal de la Ball
 func (b *Ball) Run() {
 
 	var sigue bool = true
-	var incX int32 = 10
+	var incX int32 = 50
 	var rotationSpeed int32 = 5
-
+	var contador int = 0
 	for sigue {
-		// Buscar un lugar disponible de manera segura
-		posicion := buscarLugarSeguro()
-		if posicion == -1 { // Si no hay lugares disponibles
-			fmt.Println("No hay lugares disponibles, creando uno nuevo...")
-			b.moverAZonaDeEspera()
-			time.Sleep(2 * time.Second) // Esperar un tiempo antes de volver a intentar
-			continue
+		if salida {
+			if salidaR {
+				salida = false
+				salidaR = false
+				// Buscar un lugar disponible de manera segura
 
-		}
+				posicion := buscarLugarSeguro()
+				if posicion == -1 { // Si no hay lugares disponibles
+					//fmt.Println("No hay lugares disponibles, creando uno nuevo...")
+					b.moverAZonaDeEspera()
+					time.Sleep(1 * time.Second) // Esperar un tiempo antes de volver a intentar
+					continue
 
-		// Obtener la posición asignada
-		mu.Lock()
-		lugarSeleccionado := posiciones[posicion]
-		originX := int32(lugarSeleccionado.X)
-		originY := int32(lugarSeleccionado.Y)
-		mu.Unlock()
+				}
 
-		// Mover la Ball hacia el lugar asignado
-		b.status = true
-		b.posX = 0
-		b.posY = 200
-		b.angulo = 0
-		for b.status {
-			if b.posX != originX {
-				b.posX += incX
+				// Obtener la posición asignada
+				mu.Lock()
+				lugarSeleccionado := posiciones[posicion]
+				originX := int32(lugarSeleccionado.X)
+				originY := int32(lugarSeleccionado.Y)
+				mu.Unlock()
+				wait := true
+				// Mover la Ball hacia el lugar asignado
 				b.status = true
-			}
-			if b.posX == originX {
-				b.posY = originY
-				b.status = false
+				b.angulo = 0
+				wait = true
+				b.posX = -100
+				b.posY = 200
+				b.NotifyAll()
+				for b.status {
+					for wait {
+						if b.posX != originX {
+							b.posX += incX
+							b.status = true
+						}
+						if b.posX == originX {
+							b.posY = originY
+							b.status = false
+							wait = false
+						}
+
+						// Rotación de la Ball
+						b.angulo = (b.angulo + rotationSpeed) % 90
+						b.NotifyAll()
+						time.Sleep(50 * time.Millisecond)
+					}
+
+				}
+
+				//fmt.Printf("Ball estacionada en lugar: %+v\n", posiciones[posicion])
+
+				//fmt.Println("completadp")
+
+				sigue = false
+				salida = true
+				salidaR = true
+				time.Sleep(time.Duration(rand.Intn(20)) * time.Second)
+				mu.Lock()
+				salida = false
+				if !salida {
+					wait = false
+
+				}
+				mu.Unlock()
+				b.posicion = posicion
+
+				//fmt.Printf("Ball liberó lugar: %+v\n", posiciones[posicion])
 			}
 
-			// Rotación de la Ball
-			b.angulo = (b.angulo + rotationSpeed) % 360
-			b.NotifyAll()
-			time.Sleep(50 * time.Millisecond)
-
+		} else {
+			contador++
+			time.Sleep(1 * time.Second)
+			//fmt.Println("esperando a que salida se desocupe salida", salida, salidaR)
 		}
-
-		fmt.Printf("Ball estacionada en lugar: %+v\n", posiciones[posicion])
-
-		fmt.Println("completadp")
-
-		sigue = false
-
-		time.Sleep(time.Duration(rand.Intn(20)) * time.Second)
-		mu.Lock()
-
-		posiciones[posicion].ocupado = false
-		mu.Unlock()
-
-		fmt.Printf("Ball liberó lugar: %+v\n", posiciones[posicion])
-
 	}
 
 }
 
 // Mover la Ball a la zona de espera
 func (b *Ball) moverAZonaDeEspera() {
+	mover := true
 	b.esperando = true
-	b.posX = 100
-	b.posY = 100
-	b.NotifyAll()
-	fmt.Println("Ball en la zona de espera...")
+
+	x := int32(100)
+	y := int32(100)
+	var inX int32 = 10
+	var inY int32 = 10
+
+	for mover {
+		if b.posX != x {
+			b.posX += inX
+
+		}
+		if b.posY != y {
+			b.posY -= inY
+		}
+		if b.posX == x {
+			if b.posY == y {
+				mover = false
+				salida = true
+				salidaR = true
+			}
+		}
+		b.NotifyAll()
+		time.Sleep(50 * time.Millisecond)
+	}
+
+	//fmt.Println("Ball en la zona de espera...")
 }
 
 // Buscar un lugar disponible de manera segura
@@ -133,7 +180,7 @@ func buscarLugarSeguro() int {
 }
 
 // Agregar un nuevo lugar de manera segura
-func agregarLugarSeguro() {
+/*func agregarLugarSeguro() {
 	mu.Lock()
 	defer mu.Unlock()
 
@@ -145,8 +192,8 @@ func agregarLugarSeguro() {
 	}
 
 	posiciones = append(posiciones, nuevoLugar)
-	fmt.Println("Se agregó un nuevo lugar:", nuevoLugar)
-}
+	//fmt.Println("Se agregó un nuevo lugar:", nuevoLugar)
+}*/
 
 // Register añade un observador a la lista
 func (b *Ball) Register(observer Observer) {
@@ -172,23 +219,44 @@ func (b *Ball) NotifyAll() {
 
 // func Destruir(b *Ball, done chan<- bool) {
 func Destruir(b *Ball) {
-	var desX int32 = 10
-	originX := int32(100)
+
+	var desX int32 = 50
+	originX := int32(-50)
 	b.posY = 200
 	b.status = true
 	for b.status {
-		if b.posX != originX {
-			b.posX -= desX
-			b.status = true
+
+		if !salida {
+			for b.status {
+				if salidaR {
+					salidaR = false
+					for b.status {
+						if b.posX != originX {
+							b.posX -= desX
+							b.status = true
+
+						}
+						if b.posX == originX {
+							salida = true
+							salidaR = true
+							b.status = false
+							posiciones[b.posicion].ocupado = false
+						}
+						b.NotifyAll()
+						time.Sleep(50 * time.Millisecond)
+					}
+				} else {
+					time.Sleep(1 * time.Second)
+				}
+			}
+		} else {
+			time.Sleep(1 * time.Second)
+			//fmt.Println("esperando a salir : salidaR", salidaR, salida)
 		}
-		if b.posX == originX {
-			b.status = false
-		}
-		b.NotifyAll()
-		time.Sleep(50 * time.Millisecond)
 
 	}
-	fmt.Println("DEstruir--")
+
+	//fmt.Println("DEstruir--")
 
 }
 func Estacionamiento(estadoChannel <-chan string, resultadoChannel chan<- bool, v *vigilante.Vigilante) {
@@ -199,7 +267,7 @@ func Estacionamiento(estadoChannel <-chan string, resultadoChannel chan<- bool, 
 
 		resultadoChannel <- resultado
 
-		fmt.Printf("Estacionamiento procesó: %s | Entrada libre: %v\n", estado, resultado)
+		//fmt.Printf("Estacionamiento procesó: %s | Entrada libre: %v\n", estado, resultado)
 
 	}
 }

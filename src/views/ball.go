@@ -20,7 +20,7 @@ func NewBall() *Ball {
 func (b *Ball) AddBall(c scenes.Scene) {
 	pelota := canvas.NewImageFromURI(storage.NewFileURI("./assets/autoConcurrente.png"))
 	pelota.Resize(fyne.NewSize(48, 96))
-	pelota.Move(fyne.NewPos(50, 200))
+	pelota.Move(fyne.NewPos(-100, 200))
 	b.Ball = pelota
 	c.AddImage(pelota)
 }
