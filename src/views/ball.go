@@ -18,11 +18,11 @@ func NewCar() *Car {
 }
 
 func (b *Car) AddCar(c scenes.Scene) {
-	pelota := canvas.NewImageFromURI(storage.NewFileURI("./assets/autoConcurrente.png"))
-	pelota.Resize(fyne.NewSize(48, 96))
-	pelota.Move(fyne.NewPos(-100, 200))
-	b.Car = pelota
-	c.AddImage(pelota)
+	carro := canvas.NewImageFromURI(storage.NewFileURI("./assets/autoConcurrente.png"))
+	carro.Resize(fyne.NewSize(48, 96))
+	carro.Move(fyne.NewPos(-100, 200))
+	b.Car = carro
+	c.AddImage(carro)
 }
 
 // Update define lo que el observador hará cuando reciba una notificación
@@ -33,7 +33,7 @@ func (b *Car) Update(pos models.Pos) {
 
 func (b *Car) RemoveCar() {
 	if b.Car != nil {
-		b.Car.Hide() // Ocultar la imagen antes de destruirla
-		b.Car = nil  // Eliminar la referencia
+		//b.Car.Hide() // Ocultar la imagen antes de destruirla
+		b.Car = nil // Eliminar la referencia
 	}
 }
