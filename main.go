@@ -5,6 +5,7 @@ import (
 	"estacionamientoGo/src/scenes"
 	"estacionamientoGo/src/views"
 	"fmt"
+	"math/rand"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -12,6 +13,10 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+func getPoissonInterval(lambda float64) time.Duration {
+	interval := rand.ExpFloat64() / lambda // Intervalo exponencial
+	return time.Duration(interval * float64(time.Second))
+}
 func main() {
 	myApp := app.New()
 	stage := myApp.NewWindow("App - Car")
@@ -36,7 +41,7 @@ func main() {
 			// Goroutine principal para manejar entrada y salida
 			go func() {
 
-				b1.Run() // Manejar lógica de entrada
+				b1.Run()
 
 				models.Destruir(b1) // Animación de salida
 
@@ -44,7 +49,8 @@ func main() {
 			}()
 
 			fmt.Println("auto creado numero: ", i)
-			time.Sleep(600 * time.Millisecond)
+			waitTime := getPoissonInterval(1)
+			time.Sleep(waitTime)
 		}
 	})
 
@@ -53,4 +59,5 @@ func main() {
 	scene.AddWidget(button)
 
 	stage.ShowAndRun()
+
 }
